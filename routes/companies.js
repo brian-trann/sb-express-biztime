@@ -73,7 +73,7 @@ router.put('/:code', async (req, res, next) => {
 			}
 		});
 		const code = req.params.code.toLowerCase();
-		console.log('yes');
+
 		const result = await db.query(
 			`UPDATE companies
       SET name=$1, description=$2

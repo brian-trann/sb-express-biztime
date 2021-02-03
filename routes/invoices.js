@@ -38,7 +38,7 @@ router.get('/:id', async (req, res, next) => {
 		);
 
 		if (result.rows.length === 0) {
-			throw new ExpressError(`There is no company with code: ${id}`);
+			throw new ExpressError(`There is no company with code: ${id}`, 404);
 		}
 		const d = result.rows[0];
 		const invoice = {
@@ -82,7 +82,7 @@ router.post('/', async (req, res, next) => {
 			[ lowerCompCode, amt ]
 		);
 
-		return res.json({ invoice: result.rows[0] });
+		return res.status(201).json({ invoice: result.rows[0] });
 	} catch (error) {
 		return next(error);
 	}
@@ -151,9 +151,9 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
 	try {
 		const id = req.params.id;
-		const result = await db.query(`DELETE FROM invoices WHERE id=$1`, [ id ]);
+		const result = await db.query(`DELETE FROM invoices WHERE id=$1 RETURNING id`, [ id ]);
 		if (result.rows.length === 0) {
-			throw new ExpressError(`There's no company with code of: ${code}`, 404);
+			throw new ExpressError(`There's no company with code of: ${id}`, 404);
 		}
 		return res.json({ status: 'deleted' });
 	} catch (error) {
