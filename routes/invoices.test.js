@@ -8,6 +8,7 @@ const db = require('../db');
 let testInvoice;
 let testCompany;
 
+// Company has to be defined first because the invoice relies on a company code FK
 beforeEach(async () => {
 	let resultCompany = await db.query(
 		`INSERT INTO companies(code,name,description)

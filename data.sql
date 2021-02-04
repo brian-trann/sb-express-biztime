@@ -19,12 +19,41 @@ CREATE TABLE invoices (
     CONSTRAINT invoices_amt_check CHECK ((amt > (0)::double precision))
 );
 
+CREATE TABLE industries(
+  code text PRIMARY KEY,
+  industry text NOT NULL
+);
+
+CREATE TABLE companies_industries(
+  comp_code text NOT NULL REFERENCES companies,
+  industry_code text NOT NULL REFERENCES industries,
+  PRIMARY KEY (comp_code,industry_code)
+);
+
 INSERT INTO companies
   VALUES ('apple', 'Apple Computer', 'Maker of OSX.'),
          ('ibm', 'IBM', 'Big blue.');
 
-INSERT INTO invoices (comp_Code, amt, paid, paid_date)
+INSERT INTO invoices (comp_code, amt, paid, paid_date)
   VALUES ('apple', 100, false, null),
          ('apple', 200, false, null),
          ('apple', 300, true, '2018-01-01'),
          ('ibm', 400, false, null);
+
+INSERT INTO industries (code, industry)
+  VALUES ('tech', 'Technology'),
+        ('fruit', 'Fruit');
+
+INSERT INTO companies_industries (comp_code, industry_code)
+  VALUES ('apple','tech'),
+        ('apple','fruit'),
+        ('ibm','tech');
+
+-- SELECT ind.code,ind.industry,c.name
+-- FROM industries AS ind
+-- LEFT JOIN 
+--   companies_industries AS ci
+--   ON ind.code = ci.industry_code
+-- LEFT JOIN
+--   companies AS c
+--   ON ci.comp_code = c.code;

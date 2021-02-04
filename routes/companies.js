@@ -20,11 +20,34 @@ router.get('/:code', async (req, res, next) => {
 	try {
 		const code = req.params.code.toLowerCase();
 
-		const companyQuery = await db.query(`SELECT code,name,description FROM companies WHERE code = $1`, [ code ]);
+		const companyQuery = await db.query(
+			`SELECT code,name,description 
+      FROM companies 
+      WHERE code = $1`,
+			[ code ]
+		);
+		const industries = await db.query(
+			`SELECT industry_code
+      FROM companies_industries
+      WHERE comp_code = $1
+      `,
+			[ code ]
+		);
+
+		const industriesArr = industries.rows.map((industry) => industry['industry_code']);
+
 		if (companyQuery.rows.length === 0) {
 			throw new ExpressError(`There is no company with code of: ${code}`, 404);
 		}
-		return res.json({ company: companyQuery.rows[0] });
+		const c = companyQuery.rows[0];
+		return res.json({
+			company : {
+				code        : c.code,
+				name        : c.name,
+				description : c.description,
+				industries  : industriesArr
+			}
+		});
 	} catch (error) {
 		return next(error);
 	}
@@ -42,12 +65,12 @@ router.post('/', async (req, res, next) => {
 				throw new ExpressError('Please provide valid parameters', 404);
 			}
 		});
-		const lowerCode = req.body.code.toLowerCase();
+		const lowerSlug = req.body.code.replace(/[^\w]/g, '').toLowerCase();
 		const result = await db.query(
 			`INSERT INTO companies(code,name,description)
         VALUES($1,$2,$3)
         RETURNING code,name,description`,
-			[ lowerCode, req.body.name, req.body.description ]
+			[ lowerSlug, req.body.name, req.body.description ]
 		);
 		return res.status(201).json({ company: result.rows[0] });
 	} catch (error) {
